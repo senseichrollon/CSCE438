@@ -64,6 +64,7 @@ class SNSServiceImpl final : public SNSService::Service {
       in >> p.username;
       in >> p.post_time;
       in >> p.contents;
+      allPosts.push_back(p);
     }
 
     in.close();
@@ -191,7 +192,7 @@ class SNSServiceImpl final : public SNSService::Service {
           google::protobuf::Timestamp* stamp = new google::protobuf::Timestamp();
           stamp->set_seconds(p.post_time);
           Message message;
-          message.set_username(user);
+          message.set_username(p.username);
           message.set_msg(p.contents);
           message.set_allocated_timestamp(stamp);
           stream->Write(message);
@@ -219,7 +220,7 @@ class SNSServiceImpl final : public SNSService::Service {
           google::protobuf::Timestamp* stamp = new google::protobuf::Timestamp();
           stamp->set_seconds(p.post_time);
           Message message;
-          message.set_username(user);
+          message.set_username(p.username);
           message.set_msg(p.contents);
           message.set_allocated_timestamp(stamp);
           stream->Write(message);

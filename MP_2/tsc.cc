@@ -54,7 +54,6 @@ int main(int argc, char** argv) {
                 std::cerr << "Invalid Command Line Argument\n";
         }
     }
-    
     Client myc(hostname, username, port);
     // You MUST invoke "run_client" function to start business logic
     myc.run_client();
@@ -79,8 +78,7 @@ int Client::connectTo()
     Request request;
     request.set_username(username);
     Reply reply;
-    stub_->Login(&context,request,&reply);
-    cout << reply.msg() << endl;
+    status = stub_->Login(&context,request,&reply);
     if(status.ok() && reply.msg() == "SUCCESS") {
         return 1;
     }
