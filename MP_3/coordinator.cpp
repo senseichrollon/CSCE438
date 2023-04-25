@@ -46,7 +46,11 @@ unordered_map<int, Cluster*> clusters;
 
 
 //unsigned time;
-
+void assign(Heartbeat h, Server *s) {
+      s->set_server_ip(h.server_ip());
+      s->set_port_num(h.server_port());
+      s->set_server_id(h.server_id());
+}
 
 class SNSCoordinatorImpl final : public SNSCoordinator::Service {
     public:
@@ -59,20 +63,19 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
       if(h.server_type() == ServerType::MASTER) {
         clusters[id]->master = s;
         s->set_server_type(h.server_type());
+        assign(h,s);
         clusters[id]->masterActive = true;
       } else if(h.server_type() == ServerType::SLAVE) {
         clusters[id]->slave = s;
         s->set_server_type(h.server_type());
+        assign(h,s);
         clusters[id]->slaveActive = true;
       } else {
         clusters[id]->sync = s;
         s->set_server_type(h.server_type());
+        assign(h,s);
         clusters[id]->syncActive = true;
       }
-
-      s->set_server_ip(h.server_ip());
-      s->set_port_num(h.server_port());
-      s->set_server_id(id);
         auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(20);
       
         std::mutex mutex;
@@ -154,9 +157,7 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
         while(!clusters[id]->slaveActive) {
           std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-
         server->CopyFrom(*(clusters[id]->slave));
-        
         return Status::OK;
     }
 

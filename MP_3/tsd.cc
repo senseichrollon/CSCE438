@@ -50,6 +50,7 @@ string directory;
 void createFile() {
   ofstream o(directory);
   o << "0 0" << endl;
+  cout << "hi" << endl;
   o.close();
 }
 
@@ -57,12 +58,13 @@ class SNSServiceImpl final : public SNSService::Service {
   public:
   void loadData() {
 
-
+    cout << "bay" << endl;
     ifstream in;
     in.open(directory);
     if(!in) {
       createFile();
     }
+    in = ifstream(directory);
     int num_users;
     in >> num_users;
 
@@ -295,7 +297,9 @@ void RunServer(string ip, std::string port_no) {
   string address = ip + ":" + port_no;
   ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());
+
   builder.RegisterService(&server);
+
   std::unique_ptr<grpc::Server> srv(builder.BuildAndStart());
   srv->Wait();
 }
@@ -310,34 +314,36 @@ void connectToCoordinator(string &cip, string &cp, int id, string &port) {
   h.set_server_type(ServerType::SLAVE);
   h.set_server_ip(cip);
   h.set_server_port(port);
+std::shared_ptr<ClientReaderWriter<Heartbeat, Heartbeat>> stream(stub_->HandleHeartBeats(&context));
+ stream->Write(h);
   if(!isSlave) {
-        h.set_server_type(ServerType::MASTER);
-    // Status status = stub_->GetSlave(&context,cId,slave);
-    // if(!status.ok()) cout << "boo" << endl;
-    // cout << "bro" << endl;
-    // string info = slave->server_ip() + ":" + slave->port_num();
-    // cout << info << endl;
-    // slaveStub_ = SNSService::NewStub(grpc::CreateChannel(info, grpc::InsecureChannelCredentials()));
+        cout << "hoi" << endl;
+
+    h.set_server_type(ServerType::MASTER);
+    Status status = stub_->GetSlave(&context,cId,slave);
+    if(!status.ok()) cout << "boo" << endl;
+    cout << "bro" << endl;
+    string info = slave->server_ip() + ":" + slave->port_num();
+    cout << info << endl;
+    slaveStub_ = SNSService::NewStub(grpc::CreateChannel(info, grpc::InsecureChannelCredentials()));
   }
 
-  std::shared_ptr<ClientReaderWriter<Heartbeat, Heartbeat>> stream(stub_->HandleHeartBeats(&context));
-  stream->Write(h);
-  cout << "yo" << endl;
 
-  // while(true) {
-  //    unsigned time = std::time(0);
-  //    google::protobuf::Timestamp *stamp = new google::protobuf::Timestamp();
-  //    stamp->set_seconds(time);
-  //    h.set_allocated_timestamp(stamp);
-  //    stream->Write(h);
-  //    std::this_thread::sleep_for(std::chrono::seconds(10));
-  // }
+  cout << "checkpoint 3" << endl;
+  while(true) {
+     unsigned time = std::time(0);
+     google::protobuf::Timestamp *stamp = new google::protobuf::Timestamp();
+     stamp->set_seconds(time);
+     h.set_allocated_timestamp(stamp);
+     stream->Write(h);
+     std::this_thread::sleep_for(std::chrono::seconds(10));
+  }
 }
 
 static struct option optlong[] ={
     {"cip", required_argument, 0, 'c'},
     {"cp", required_argument, 0, 'i'},
-    {"p", required_argument, 0, 'p'},
+     {"p", required_argument, 0, 'p'},
     {"id", required_argument, 0, 'd'},
     {"t", required_argument, 0, 't'},
     {0, 0, 0, 0}};
@@ -379,7 +385,7 @@ int main(int argc, char** argv) {
   }
   server_id = id;
 
-  directory = type + to_string(id) + "/datafile.txt";
+  directory = type + to_string(id) + ".txt";
   thread t(connectToCoordinator, std::ref(coordinatorIP), std::ref(coordinatorPort), id, std::ref(port));
   t.detach();
   RunServer("localhost",port);
