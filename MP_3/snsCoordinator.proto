@@ -19,8 +19,6 @@ enum ServerType {
 	SYNC = 2;
 }
 
-
-
 // 	Resolving server
 message User {
 	int32 user_id = 1;

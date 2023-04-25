@@ -3,9 +3,15 @@
 #include <unistd.h>
 #include <grpc++/grpc++.h>
 #include <thread>
+#include <getopt.h>
 #include "sns.grpc.pb.h"
 #include "snsCoordinator.grpc.pb.h"
 #include "client.h"
+#include <glog/logging.h>
+#define log(severity, msg) \
+    LOG(severity) << msg;  \
+    google::FlushLogFiles(google::severity);
+
 using csce438::Message;
 using csce438::Reply;
 using csce438::Request;
@@ -49,34 +55,40 @@ private:
     std::unique_ptr<SNSCoordinator::Stub> stub2_;
 };
 
+static struct option optlong[] ={
+    {"cip", required_argument, 0, 'a'},
+    {"cp", required_argument, 0, 'b'},
+    {"id", required_argument, 0, 'd'},
+    {0, 0, 0, 0}};
+
 int main(int argc, char **argv)
 {
 
     int id = 0;
     string coordinatorPort = "3010";
     string coordinatorIP = "localhost";
-    
+    int idx = 0;
     int opt = 0;
-    while ((opt = getopt(argc, argv, "cip:cp:id:")) != -1)
+    while ((opt = getopt_long(argc, argv, "a:b:d:", optlong, &idx)) != -1)
     {
         switch (opt)
         {
-        case 'cip':
+        case 'a':
             coordinatorIP = optarg;
             break;
-        case 'cp':
+        case 'b':
             coordinatorPort = optarg;
             break;
-        case 'id':
+        case 'd':
             id = atoi(optarg);
             break;
         default:
             std::cerr << "Invalid Command Line Argument\n";
         }
     }
- //   Client myc(hostname, username, port);
+    Client myc(coordinatorIP, to_string(id), coordinatorPort);
     // You MUST invoke "run_client" function to start business logic
-  //  myc.run_client();
+    myc.run_client();
 
     return 0;
 }
@@ -97,7 +109,7 @@ int Client::connectTo()
     
     
     stub2_ = SNSCoordinator::NewStub(grpc::CreateChannel(cip + ":" + cp, grpc::InsecureChannelCredentials()));
-
+    cout << (cip + ":" + cp) << endl;
     ClientContext context;
     User user;
     user.set_user_id(stoi(username));
@@ -105,8 +117,8 @@ int Client::connectTo()
     Status status = stub2_->GetServer(&context,user,&server);
 
     if(!status.ok()) return -1;    
-
      string info = server.server_ip() + ":" + server.port_num();
+     cout << info << endl;
      stub_ = SNSService::NewStub(grpc::CreateChannel(info, grpc::InsecureChannelCredentials()));
      ClientContext context2;
      Request request;
@@ -223,6 +235,7 @@ IReply Client::processCommand(std::string &input)
     }
     else
     {
+        run_client();
         ire.comm_status = FAILURE_UNKNOWN;
     }
     return ire;
@@ -234,7 +247,6 @@ void process_input(std::shared_ptr<ClientReaderWriter<Message, Message>> stream,
     {
         string inp = getPostMessage();
         unsigned time = std::time(0);
-        //   stream->Write()
         google::protobuf::Timestamp *stamp = new google::protobuf::Timestamp();
         stamp->set_seconds(time);
         Message message;

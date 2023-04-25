@@ -1,8 +1,9 @@
 #include <ctime>
-
+#include <mutex>
+#include <condition_variable>
 #include <google/protobuf/duration.pb.h>
 #include <google/protobuf/timestamp.pb.h>
-
+#include <thread>
 #include <fstream>
 #include <glog/logging.h>
 #include <google/protobuf/util/time_util.h>
@@ -12,19 +13,18 @@
 #include <stdlib.h>
 #include <string>
 #include <unistd.h>
+#include <getopt.h>
 #define log(severity, msg) \
     LOG(severity) << msg;  \
     google::FlushLogFiles(google::severity);
 
 #include "snsCoordinator.grpc.pb.h"
-
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::ServerReader;
 using grpc::ServerReaderWriter;
 using grpc::ServerWriter;
 using grpc::Status;
-//using snsCoordinator::ActiveStatus;
 using snsCoordinator::ClusterId;
 using snsCoordinator::FollowSyncs;
 using snsCoordinator::Heartbeat;
@@ -34,53 +34,134 @@ using snsCoordinator::SNSCoordinator;
 using snsCoordinator::User;
 using snsCoordinator::Users;
 using namespace std;
+
+
+struct Cluster {
+        Server* master;
+        Server* slave;
+        Server* sync;
+        bool masterActive, slaveActive, syncActive;
+};
+unordered_map<int, Cluster*> clusters;
+
+
+//unsigned time;
+
+
 class SNSCoordinatorImpl final : public SNSCoordinator::Service {
     public:
     Status HandleHeartBeats(ServerContext *context, ServerReaderWriter<Heartbeat, Heartbeat>* stream) override {
+      
+      Heartbeat h;
+      int id = h.server_id();
+      stream->Read(&h);
+      Server* s = new Server();
+      if(h.server_type() == ServerType::MASTER) {
+        clusters[id]->master = s;
+        s->set_server_type(h.server_type());
+        clusters[id]->masterActive = true;
+      } else if(h.server_type() == ServerType::SLAVE) {
+        clusters[id]->slave = s;
+        s->set_server_type(h.server_type());
+        clusters[id]->slaveActive = true;
+      } else {
+        clusters[id]->sync = s;
+        s->set_server_type(h.server_type());
+        clusters[id]->syncActive = true;
+      }
+
+      s->set_server_ip(h.server_ip());
+      s->set_port_num(h.server_port());
+      s->set_server_id(id);
+        auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(20);
+      
+        std::mutex mutex;
+        std::condition_variable cv;
+        bool received_request = false;
+
+        std::thread reader_thread([&]() {
+            while (stream->Read(&h))
+            {
+              cout  << "yo" << endl;
+                std::unique_lock<std::mutex> lock(mutex);
+                received_request = true;
+                cv.notify_one();
+                deadline = std::chrono::system_clock::now() + std::chrono::seconds(20);
+            }
+        });
+
+        while (true)
+        {
+            std::unique_lock<std::mutex> lock(mutex);
+            while (!received_request && std::chrono::system_clock::now() < deadline)
+            {
+                cv.wait_until(lock, deadline);
+            }
+
+            if (!received_request)
+            {
+          if(s->server_type() == ServerType::MASTER) {
+            clusters[id]->masterActive = false;
+          } else if(s->server_type() == ServerType::SLAVE) {
+
+            clusters[id]->slaveActive = false;
+          } else {
+            clusters[id]->syncActive = false;
+      }
+                return grpc::Status(grpc::StatusCode::DEADLINE_EXCEEDED, "Receiving next request timed out");
+            }
+
+            received_request = false;
+        }
+
+      reader_thread.join();
       return Status::OK;
     }
 
     Status GetFollowSyncsForUsers(ServerContext *context, const Users *users, FollowSyncs *fsyncs) override {
+      for (auto user : users->users()) {
+        int id = (user % 3);
+   //     if(id == 0) id = 3;
+        Server* sync = clusters[id]->sync;
+        fsyncs->add_users(user);
+        fsyncs->add_follow_syncs(id);
+        fsyncs->add_follow_sync_ip(sync->server_ip());
+        fsyncs->add_port_nums(sync->port_num());
+      }
+      
       return Status::OK;
     }
 
     Status GetServer(ServerContext *context, const User *user, Server *server) override {
- //       log(INFO, "GetServer called for user " << user->user_id());
+    //   log(INFO, "Server starting");
+        int id = (user->user_id() % 3);
+     //   if(id == 0) id = 3;
 
-        int id = (user->user_id() % 3) + 1;
-
-        if(clusters[id]->master->active()) {
-          server->CopyFrom(*clusters[id]->master);
+        if(clusters[id]->masterActive) {
+          cout << "yo3" << endl;
+          server->CopyFrom(*(clusters[id]->master));
         } else {
-          server->CopyFrom(*clusters[id]->slave);
+          server->CopyFrom(*(clusters[id]->slave));
         }
-
-        // // return master if active, else return slave
-        // if (clusters[clusterId][0]->active_status() == ActiveStatus::ACTIVE) {
-        //     server->CopyFrom(clusters[clusterId][0]);
-        // } else {
-        //     server->CopyFrom(clusters[clusterId][1]);
-        // }
 
         return Status::OK;
     }
 
     Status GetSlave(ServerContext *context, const ClusterId *cluster_id, Server *server) override {
      //   log(INFO, "GetSlave called for master " << cluster_id->cluster());
+        int id = cluster_id->cluster();
 
-        server->CopyFrom(*clusters[cluster_id->cluster()]->slave);
+        while(!clusters[id]->slaveActive) {
+          std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+
+        server->CopyFrom(*(clusters[id]->slave));
         
         return Status::OK;
     }
-    struct Cluster {
-        Server* master;
-        Server* slave;
-        Server* sync;
-    };
 
-    unordered_map<int, Cluster*> clusters;
-    
 
+  
     //private:
 
 };
@@ -92,17 +173,22 @@ void RunServer(std::string port_no) {
   // ------------------------------------------------------------
   SNSCoordinatorImpl server;
   string address = "localhost:" + port_no;
+  cout << address << endl;
   ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());
   builder.RegisterService(&server);
   std::unique_ptr<grpc::Server> srv(builder.BuildAndStart());
   srv->Wait();
+  cout << "hey" << endl;
 }
 
 int main(int argc, char** argv) {
-  
+  clusters[0] = new Cluster();
+  clusters[1] = new Cluster();
+  clusters[2] = new Cluster();
   std::string port = "3010";
   int opt = 0;
+  cout << "hi" << endl;
   while ((opt = getopt(argc, argv, "p:")) != -1){
     switch(opt) {
       case 'p':

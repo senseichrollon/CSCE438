@@ -10,8 +10,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <thread>
+#include <getopt.h>
 #include <google/protobuf/util/time_util.h>
 #include <grpc++/grpc++.h>
+#include "snsCoordinator.grpc.pb.h"
 using snsCoordinator::ClusterId;
 using snsCoordinator::FollowSyncs;
 using snsCoordinator::Heartbeat;
@@ -25,26 +27,41 @@ using snsCoordinator::Users;
 using namespace std;
 using google::protobuf::Timestamp;
 using google::protobuf::Duration;
-using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::ServerReader;
 using grpc::ServerReaderWriter;
 using grpc::ServerWriter;
 using grpc::Status;
+using grpc::Channel;
+using grpc::ClientContext;
+using grpc::ClientReaderWriter;
 using csce438::Message;
 using csce438::Request;
 using csce438::Reply;
 using csce438::SNSService;
 
+Server* slave;
+bool isSlave = false;
+std::unique_ptr<SNSService::Stub> slaveStub_;
+int server_id;
+string directory;
+
+void createFile() {
+  ofstream o(directory);
+  o << "0 0" << endl;
+  o.close();
+}
+
 class SNSServiceImpl final : public SNSService::Service {
   public:
   void loadData() {
+
+
     ifstream in;
-    in.open("datafile.txt");
-    while(in.fail()) {
-      sleep(1);
-      in.open("datafile.txt");
+    in.open(directory);
+    if(!in) {
+      createFile();
     }
     int num_users;
     in >> num_users;
@@ -81,11 +98,7 @@ class SNSServiceImpl final : public SNSService::Service {
 
     ofstream out;
     out.open("datafile.txt");
-
-    while(out.fail()) {
-      sleep(1);
-      out.open("datafile.txt");
-    }
+  
     out << users.size() << endl;
     for(auto user : users) {
       vector<string> follow = following[user];
@@ -131,7 +144,11 @@ class SNSServiceImpl final : public SNSService::Service {
     // request from a user to follow one of the existing
     // users
     // ------------------------------------------------------------
-    
+    if(!isSlave) {
+      Reply r;
+      ClientContext cContext;
+      slaveStub_->Follow(&cContext, *request, &r);
+    }
     string username = request->username();
     string client_name = *(request->arguments().begin());
 
@@ -236,8 +253,8 @@ class SNSServiceImpl final : public SNSService::Service {
       
     }
  
-    thread tt(&SNSServiceImpl::sendPost, this,stream, std::ref(user)) ;
-    tt.detach();
+     thread tt(&SNSServiceImpl::sendPost, this,stream, std::ref(user)) ;
+     tt.detach();
     
     Message m;
     while(stream->Read(&m)) {
@@ -279,34 +296,74 @@ void RunServer(string ip, std::string port_no) {
   ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());
   builder.RegisterService(&server);
-  std::unique_ptr<Server> srv(builder.BuildAndStart());
+  std::unique_ptr<grpc::Server> srv(builder.BuildAndStart());
   srv->Wait();
 }
 
-void handleHeartBeat() {
-  
+void connectToCoordinator(string &cip, string &cp, int id, string &port) {
+  std::unique_ptr<SNSCoordinator::Stub> stub_ = SNSCoordinator::NewStub(grpc::CreateChannel(cip + ":" + cp, grpc::InsecureChannelCredentials()));
+  ClientContext context;
+  ClusterId cId;
+  cId.set_cluster(id);
+  Heartbeat h;
+  h.set_server_id(id);
+  h.set_server_type(ServerType::SLAVE);
+  h.set_server_ip(cip);
+  h.set_server_port(port);
+  if(!isSlave) {
+        h.set_server_type(ServerType::MASTER);
+    // Status status = stub_->GetSlave(&context,cId,slave);
+    // if(!status.ok()) cout << "boo" << endl;
+    // cout << "bro" << endl;
+    // string info = slave->server_ip() + ":" + slave->port_num();
+    // cout << info << endl;
+    // slaveStub_ = SNSService::NewStub(grpc::CreateChannel(info, grpc::InsecureChannelCredentials()));
+  }
+
+  std::shared_ptr<ClientReaderWriter<Heartbeat, Heartbeat>> stream(stub_->HandleHeartBeats(&context));
+  stream->Write(h);
+  cout << "yo" << endl;
+
+  // while(true) {
+  //    unsigned time = std::time(0);
+  //    google::protobuf::Timestamp *stamp = new google::protobuf::Timestamp();
+  //    stamp->set_seconds(time);
+  //    h.set_allocated_timestamp(stamp);
+  //    stream->Write(h);
+  //    std::this_thread::sleep_for(std::chrono::seconds(10));
+  // }
 }
 
+static struct option optlong[] ={
+    {"cip", required_argument, 0, 'c'},
+    {"cp", required_argument, 0, 'i'},
+    {"p", required_argument, 0, 'p'},
+    {"id", required_argument, 0, 'd'},
+    {"t", required_argument, 0, 't'},
+    {0, 0, 0, 0}};
+
 int main(int argc, char** argv) {
-  
   std::string coordinatorIP = "localhost";
-  std::string coordinatorPort = "";
-  std::string port = "3010";
+  std::string coordinatorPort = "3010";
+  std::string port = "9000";
   int id = 0;
   string type = "";
   int opt = 0;
-  while ((opt = getopt(argc, argv, "p:cip:cp:id:t")) != -1){
+  int idx = 0;
+  
+
+  while ((opt = getopt_long(argc, argv, "c:i:p:d:t:", optlong, &idx)) != -1){
     switch(opt) {
       case 'p':
           port = optarg;
           break;
-      case 'cip':
+      case 'c':
           coordinatorIP = optarg;
           break;
-      case 'cp':
+      case 'i':
         coordinatorPort = optarg;
         break;
-      case 'id':
+      case 'd':
         id = atoi(optarg);
         break;
       case 't':
@@ -316,6 +373,15 @@ int main(int argc, char** argv) {
 	         std::cerr << "Invalid Command Line Argument\n";
     }
   }
-  //RunServer(port);
+
+  if(type == "slave") {
+    isSlave = true;
+  }
+  server_id = id;
+
+  directory = type + to_string(id) + "/datafile.txt";
+  thread t(connectToCoordinator, std::ref(coordinatorIP), std::ref(coordinatorPort), id, std::ref(port));
+  t.detach();
+  RunServer("localhost",port);
   return 0;
 }
