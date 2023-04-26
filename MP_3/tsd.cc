@@ -304,6 +304,17 @@ void RunServer(string ip, std::string port_no) {
   srv->Wait();
 }
 
+void askForSlave(std::unique_ptr<SNSCoordinator::Stub> stub_, ClusterId& cId) {
+    ClientContext c2;
+    // auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(5);
+   // c2.set_deadline(deadline);
+    Status status = stub_->GetSlave(&c2,cId,slave);
+    if(!status.ok()) cout << "boo" << endl;
+    string info = slave->server_ip() + ":" + slave->port_num();
+    cout << info << endl;
+    slaveStub_ = SNSService::NewStub(grpc::CreateChannel(info, grpc::InsecureChannelCredentials()));
+}
+
 void connectToCoordinator(string &cip, string &cp, int id, string &port) {
   std::unique_ptr<SNSCoordinator::Stub> stub_ = SNSCoordinator::NewStub(grpc::CreateChannel(cip + ":" + cp, grpc::InsecureChannelCredentials()));
   ClientContext context;
@@ -311,24 +322,20 @@ void connectToCoordinator(string &cip, string &cp, int id, string &port) {
   cId.set_cluster(id);
   Heartbeat h;
   h.set_server_id(id);
-  h.set_server_type(ServerType::SLAVE);
+  h.set_server_type(isSlave? ServerType::SLAVE : ServerType::MASTER);
   h.set_server_ip(cip);
   h.set_server_port(port);
-std::shared_ptr<ClientReaderWriter<Heartbeat, Heartbeat>> stream(stub_->HandleHeartBeats(&context));
- stream->Write(h);
-  if(!isSlave) {
-        cout << "hoi" << endl;
 
-    h.set_server_type(ServerType::MASTER);
-    Status status = stub_->GetSlave(&context,cId,slave);
-    if(!status.ok()) cout << "boo" << endl;
-    cout << "bro" << endl;
-    string info = slave->server_ip() + ":" + slave->port_num();
-    cout << info << endl;
-    slaveStub_ = SNSService::NewStub(grpc::CreateChannel(info, grpc::InsecureChannelCredentials()));
+std::shared_ptr<ClientReaderWriter<Heartbeat, Heartbeat>> stream(stub_->HandleHeartBeats(&context));
+
+ 
+
+  if(!isSlave) {
+    // thread t(askForSlave, std::move(stub_), std::ref(cId));
+    // t.detach();
   }
 
-
+  stream->Write(h);
   cout << "checkpoint 3" << endl;
   while(true) {
      unsigned time = std::time(0);

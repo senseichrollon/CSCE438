@@ -85,7 +85,8 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
         std::thread reader_thread([&]() {
             while (stream->Read(&h))
             {
-              cout  << "yo" << endl;
+              cout  << "heartbeat" << endl;
+
                 std::unique_lock<std::mutex> lock(mutex);
                 received_request = true;
                 cv.notify_one();
@@ -103,6 +104,7 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
 
             if (!received_request)
             {
+              cout << "request not recieved" << endl;
           if(s->server_type() == ServerType::MASTER) {
             clusters[id]->masterActive = false;
           } else if(s->server_type() == ServerType::SLAVE) {
@@ -111,7 +113,7 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
           } else {
             clusters[id]->syncActive = false;
       }
-                return grpc::Status(grpc::StatusCode::DEADLINE_EXCEEDED, "Receiving next request timed out");
+             //   return grpc::Status(grpc::StatusCode::DEADLINE_EXCEEDED, "Receiving next request timed out");
             }
 
             received_request = false;
@@ -136,10 +138,11 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
     }
 
     Status GetServer(ServerContext *context, const User *user, Server *server) override {
-    //   log(INFO, "Server starting");
+       
+   //     cout << "checkpoint" << endl;
         int id = (user->user_id() % 3);
      //   if(id == 0) id = 3;
-
+   //     LOG(INFO) << "Getting Server for user " << id << endl;
         if(clusters[id]->masterActive) {
           cout << "yo3" << endl;
           server->CopyFrom(*(clusters[id]->master));
@@ -153,11 +156,14 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
     Status GetSlave(ServerContext *context, const ClusterId *cluster_id, Server *server) override {
      //   log(INFO, "GetSlave called for master " << cluster_id->cluster());
         int id = cluster_id->cluster();
+        cout << "Retrieving slave for master " << id << endl;
 
         while(!clusters[id]->slaveActive) {
           std::this_thread::sleep_for(std::chrono::seconds(1));
         }
         server->CopyFrom(*(clusters[id]->slave));
+ //       cout << "Port number for slave: " <<  server->port_num() << endl;
+        cout << "Status of master: " << clusters[id]->masterActive << endl;
         return Status::OK;
     }
 
@@ -180,13 +186,14 @@ void RunServer(std::string port_no) {
   builder.RegisterService(&server);
   std::unique_ptr<grpc::Server> srv(builder.BuildAndStart());
   srv->Wait();
-  cout << "hey" << endl;
+ // cout << "hey" << endl;
 }
 
 int main(int argc, char** argv) {
   clusters[0] = new Cluster();
   clusters[1] = new Cluster();
   clusters[2] = new Cluster();
+ // google::InitGoogleLogging("coordinator.txt");
   std::string port = "3010";
   int opt = 0;
   cout << "hi" << endl;

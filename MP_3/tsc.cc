@@ -56,8 +56,9 @@ private:
 };
 
 static struct option optlong[] ={
-    {"cip", required_argument, 0, 'a'},
-    {"cp", required_argument, 0, 'b'},
+    {"cip", required_argument, 0, 'c'},
+    {"cp", required_argument, 0, 'i'},
+     {"p", required_argument, 0, 'p'},
     {"id", required_argument, 0, 'd'},
     {0, 0, 0, 0}};
 
@@ -67,17 +68,24 @@ int main(int argc, char **argv)
     int id = 0;
     string coordinatorPort = "3010";
     string coordinatorIP = "localhost";
-    int idx = 0;
+    int idxx = 0;
     int opt = 0;
-    while ((opt = getopt_long(argc, argv, "a:b:d:", optlong, &idx)) != -1)
+    for(int i = 0; i < argc; i++) {
+     //   cout << argv[i] << endl;
+    }
+    while ((opt = getopt_long_only(argc, argv, "c:i:p:d:", optlong, &idxx)) != -1)
     {
+   //     cout << opt << endl;
         switch (opt)
         {
-        case 'a':
+        case 'c':
             coordinatorIP = optarg;
             break;
-        case 'b':
+        case 'i':
             coordinatorPort = optarg;
+         //   cout << optarg << endl;;
+            break;
+        case 'p':
             break;
         case 'd':
             id = atoi(optarg);
