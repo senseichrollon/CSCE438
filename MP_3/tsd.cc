@@ -99,7 +99,7 @@ class SNSServiceImpl final : public SNSService::Service {
   void updateData() {
 
     ofstream out;
-    out.open("datafile.txt");
+    out.open(directory);
   
     out << users.size() << endl;
     for(auto user : users) {
