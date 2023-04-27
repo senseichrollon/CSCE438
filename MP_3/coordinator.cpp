@@ -107,6 +107,7 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
               cout << "request not recieved" << endl;
           if(s->server_type() == ServerType::MASTER) {
             clusters[id]->masterActive = false;
+            cout << "yo" << endl;
           } else if(s->server_type() == ServerType::SLAVE) {
 
             clusters[id]->slaveActive = false;
