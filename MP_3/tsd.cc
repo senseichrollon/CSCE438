@@ -308,11 +308,13 @@ void askForSlave(std::unique_ptr<SNSCoordinator::Stub> stub_, ClusterId& cId) {
     ClientContext c2;
     // auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(5);
    // c2.set_deadline(deadline);
-    Status status = stub_->GetSlave(&c2,cId,slave);
-    if(!status.ok()) cout << "boo" << endl;
-    string info = slave->server_ip() + ":" + slave->port_num();
-    cout << info << endl;
-    slaveStub_ = SNSService::NewStub(grpc::CreateChannel(info, grpc::InsecureChannelCredentials()));
+    cout << "Get Slave called" << endl;
+    Status status = stub_->GetSlave2(&c2,cId,slave);
+    if(!status.ok()) cout << "Get slave failed" << endl;
+    cout << "Get Slave recieved" << endl;
+    // string info = slave->server_ip() + ":" + slave->port_num();
+    // cout << info << endl;
+    // slaveStub_ = SNSService::NewStub(grpc::CreateChannel(info, grpc::InsecureChannelCredentials()));
 }
 
 void connectToCoordinator(string &cip, string &cp, int id, string &port) {
@@ -331,8 +333,8 @@ std::shared_ptr<ClientReaderWriter<Heartbeat, Heartbeat>> stream(stub_->HandleHe
  
 
   if(!isSlave) {
-    // thread t(askForSlave, std::move(stub_), std::ref(cId));
-    // t.detach();
+    thread t(askForSlave, std::move(stub_), std::ref(cId));
+    t.detach();
   }
 
   stream->Write(h);
@@ -365,7 +367,7 @@ int main(int argc, char** argv) {
   int idx = 0;
   
 
-  while ((opt = getopt_long(argc, argv, "c:i:p:d:t:", optlong, &idx)) != -1){
+  while ((opt = getopt_long_only(argc, argv, "c:i:p:d:t:", optlong, &idx)) != -1){
     switch(opt) {
       case 'p':
           port = optarg;

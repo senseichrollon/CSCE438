@@ -198,7 +198,7 @@ const char descriptor_table_protodef_snsCoordinator_2eproto[] PROTOBUF_SECTION_V
   "rdinator.ServerType\022\021\n\tserver_ip\030\003 \001(\t\022\023"
   "\n\013server_port\030\004 \001(\t\022-\n\ttimestamp\030\005 \001(\0132\032"
   ".google.protobuf.Timestamp*-\n\nServerType"
-  "\022\n\n\006MASTER\020\000\022\t\n\005SLAVE\020\001\022\010\n\004SYNC\020\0022\256\002\n\016SN"
+  "\022\n\n\006MASTER\020\000\022\t\n\005SLAVE\020\001\022\010\n\004SYNC\020\0022\360\002\n\016SN"
   "SCoordinator\022N\n\020HandleHeartBeats\022\031.snsCo"
   "ordinator.Heartbeat\032\031.snsCoordinator.Hea"
   "rtbeat\"\000(\0010\001\022N\n\026GetFollowSyncsForUsers\022\025"
@@ -206,14 +206,16 @@ const char descriptor_table_protodef_snsCoordinator_2eproto[] PROTOBUF_SECTION_V
   "ollowSyncs\"\000\022;\n\tGetServer\022\024.snsCoordinat"
   "or.User\032\026.snsCoordinator.Server\"\000\022\?\n\010Get"
   "Slave\022\031.snsCoordinator.ClusterId\032\026.snsCo"
-  "ordinator.Server\"\000b\006proto3"
+  "ordinator.Server\"\000\022@\n\tGetSlave2\022\031.snsCoo"
+  "rdinator.ClusterId\032\026.snsCoordinator.Serv"
+  "er\"\000b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_snsCoordinator_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2ftimestamp_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_snsCoordinator_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_snsCoordinator_2eproto = {
-  false, false, 906, descriptor_table_protodef_snsCoordinator_2eproto, "snsCoordinator.proto", 
+  false, false, 972, descriptor_table_protodef_snsCoordinator_2eproto, "snsCoordinator.proto", 
   &descriptor_table_snsCoordinator_2eproto_once, descriptor_table_snsCoordinator_2eproto_deps, 1, 6,
   schemas, file_default_instances, TableStruct_snsCoordinator_2eproto::offsets,
   file_level_metadata_snsCoordinator_2eproto, file_level_enum_descriptors_snsCoordinator_2eproto, file_level_service_descriptors_snsCoordinator_2eproto,

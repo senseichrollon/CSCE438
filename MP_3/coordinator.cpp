@@ -112,7 +112,9 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
             clusters[id]->slaveActive = false;
           } else {
             clusters[id]->syncActive = false;
+
       }
+       std::this_thread::sleep_for(std::chrono::seconds(5));
              //   return grpc::Status(grpc::StatusCode::DEADLINE_EXCEEDED, "Receiving next request timed out");
             }
 
@@ -153,18 +155,24 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
         return Status::OK;
     }
 
+    Status GetSlave2 (ServerContext *context, const ClusterId *cluster_id, Server *server) override {
+       cout << "get slave called" << endl;
+      return Status::OK;
+    }
+
     Status GetSlave(ServerContext *context, const ClusterId *cluster_id, Server *server) override {
      //   log(INFO, "GetSlave called for master " << cluster_id->cluster());
-        int id = cluster_id->cluster();
-        cout << "Retrieving slave for master " << id << endl;
+          cout << "get slave called" << endl;
+//         int id = cluster_id->cluster();
+//         cout << "Retrieving slave for master " << id << endl;
 
-        while(!clusters[id]->slaveActive) {
-          std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-        server->CopyFrom(*(clusters[id]->slave));
- //       cout << "Port number for slave: " <<  server->port_num() << endl;
-        cout << "Status of master: " << clusters[id]->masterActive << endl;
-        return Status::OK;
+//         while(!clusters[id]->slaveActive) {
+//           std::this_thread::sleep_for(std::chrono::seconds(1));
+//         }
+//         server->CopyFrom(*(clusters[id]->slave));
+//  //       cout << "Port number for slave: " <<  server->port_num() << endl;
+//         cout << "Status of master: " << clusters[id]->masterActive << endl;
+         return Status::OK;
     }
 
 

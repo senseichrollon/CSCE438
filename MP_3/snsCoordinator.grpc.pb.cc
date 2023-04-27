@@ -26,6 +26,7 @@ static const char* SNSCoordinator_method_names[] = {
   "/snsCoordinator.SNSCoordinator/GetFollowSyncsForUsers",
   "/snsCoordinator.SNSCoordinator/GetServer",
   "/snsCoordinator.SNSCoordinator/GetSlave",
+  "/snsCoordinator.SNSCoordinator/GetSlave2",
 };
 
 std::unique_ptr< SNSCoordinator::Stub> SNSCoordinator::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -39,6 +40,7 @@ SNSCoordinator::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& cha
   , rpcmethod_GetFollowSyncsForUsers_(SNSCoordinator_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetServer_(SNSCoordinator_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetSlave_(SNSCoordinator_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetSlave2_(SNSCoordinator_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::ClientReaderWriter< ::snsCoordinator::Heartbeat, ::snsCoordinator::Heartbeat>* SNSCoordinator::Stub::HandleHeartBeatsRaw(::grpc::ClientContext* context) {
@@ -126,6 +128,29 @@ void SNSCoordinator::Stub::async::GetSlave(::grpc::ClientContext* context, const
   return result;
 }
 
+::grpc::Status SNSCoordinator::Stub::GetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::snsCoordinator::Server* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::snsCoordinator::ClusterId, ::snsCoordinator::Server, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetSlave2_, context, request, response);
+}
+
+void SNSCoordinator::Stub::async::GetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::snsCoordinator::ClusterId, ::snsCoordinator::Server, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetSlave2_, context, request, response, std::move(f));
+}
+
+void SNSCoordinator::Stub::async::GetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetSlave2_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>* SNSCoordinator::Stub::PrepareAsyncGetSlave2Raw(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::snsCoordinator::Server, ::snsCoordinator::ClusterId, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetSlave2_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>* SNSCoordinator::Stub::AsyncGetSlave2Raw(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncGetSlave2Raw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 SNSCoordinator::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       SNSCoordinator_method_names[0],
@@ -167,6 +192,16 @@ SNSCoordinator::Service::Service() {
              ::snsCoordinator::Server* resp) {
                return service->GetSlave(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      SNSCoordinator_method_names[4],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< SNSCoordinator::Service, ::snsCoordinator::ClusterId, ::snsCoordinator::Server, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](SNSCoordinator::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::snsCoordinator::ClusterId* req,
+             ::snsCoordinator::Server* resp) {
+               return service->GetSlave2(ctx, req, resp);
+             }, this)));
 }
 
 SNSCoordinator::Service::~Service() {
@@ -193,6 +228,13 @@ SNSCoordinator::Service::~Service() {
 }
 
 ::grpc::Status SNSCoordinator::Service::GetSlave(::grpc::ServerContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status SNSCoordinator::Service::GetSlave2(::grpc::ServerContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response) {
   (void) context;
   (void) request;
   (void) response;

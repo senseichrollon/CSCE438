@@ -65,6 +65,13 @@ class SNSCoordinator final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::snsCoordinator::Server>> PrepareAsyncGetSlave(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::snsCoordinator::Server>>(PrepareAsyncGetSlaveRaw(context, request, cq));
     }
+    virtual ::grpc::Status GetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::snsCoordinator::Server* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::snsCoordinator::Server>> AsyncGetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::snsCoordinator::Server>>(AsyncGetSlave2Raw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::snsCoordinator::Server>> PrepareAsyncGetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::snsCoordinator::Server>>(PrepareAsyncGetSlave2Raw(context, request, cq));
+    }
     class async_interface {
      public:
       virtual ~async_interface() {}
@@ -75,6 +82,8 @@ class SNSCoordinator final {
       virtual void GetServer(::grpc::ClientContext* context, const ::snsCoordinator::User* request, ::snsCoordinator::Server* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void GetSlave(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response, std::function<void(::grpc::Status)>) = 0;
       virtual void GetSlave(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void GetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void GetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response, ::grpc::ClientUnaryReactor* reactor) = 0;
     };
     typedef class async_interface experimental_async_interface;
     virtual class async_interface* async() { return nullptr; }
@@ -89,6 +98,8 @@ class SNSCoordinator final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::snsCoordinator::Server>* PrepareAsyncGetServerRaw(::grpc::ClientContext* context, const ::snsCoordinator::User& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::snsCoordinator::Server>* AsyncGetSlaveRaw(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::snsCoordinator::Server>* PrepareAsyncGetSlaveRaw(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::snsCoordinator::Server>* AsyncGetSlave2Raw(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::snsCoordinator::Server>* PrepareAsyncGetSlave2Raw(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -123,6 +134,13 @@ class SNSCoordinator final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>> PrepareAsyncGetSlave(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>>(PrepareAsyncGetSlaveRaw(context, request, cq));
     }
+    ::grpc::Status GetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::snsCoordinator::Server* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>> AsyncGetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>>(AsyncGetSlave2Raw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>> PrepareAsyncGetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>>(PrepareAsyncGetSlave2Raw(context, request, cq));
+    }
     class async final :
       public StubInterface::async_interface {
      public:
@@ -133,6 +151,8 @@ class SNSCoordinator final {
       void GetServer(::grpc::ClientContext* context, const ::snsCoordinator::User* request, ::snsCoordinator::Server* response, ::grpc::ClientUnaryReactor* reactor) override;
       void GetSlave(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response, std::function<void(::grpc::Status)>) override;
       void GetSlave(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void GetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response, std::function<void(::grpc::Status)>) override;
+      void GetSlave2(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response, ::grpc::ClientUnaryReactor* reactor) override;
      private:
       friend class Stub;
       explicit async(Stub* stub): stub_(stub) { }
@@ -153,10 +173,13 @@ class SNSCoordinator final {
     ::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>* PrepareAsyncGetServerRaw(::grpc::ClientContext* context, const ::snsCoordinator::User& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>* AsyncGetSlaveRaw(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>* PrepareAsyncGetSlaveRaw(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>* AsyncGetSlave2Raw(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::snsCoordinator::Server>* PrepareAsyncGetSlave2Raw(::grpc::ClientContext* context, const ::snsCoordinator::ClusterId& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_HandleHeartBeats_;
     const ::grpc::internal::RpcMethod rpcmethod_GetFollowSyncsForUsers_;
     const ::grpc::internal::RpcMethod rpcmethod_GetServer_;
     const ::grpc::internal::RpcMethod rpcmethod_GetSlave_;
+    const ::grpc::internal::RpcMethod rpcmethod_GetSlave2_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -168,6 +191,7 @@ class SNSCoordinator final {
     virtual ::grpc::Status GetFollowSyncsForUsers(::grpc::ServerContext* context, const ::snsCoordinator::Users* request, ::snsCoordinator::FollowSyncs* response);
     virtual ::grpc::Status GetServer(::grpc::ServerContext* context, const ::snsCoordinator::User* request, ::snsCoordinator::Server* response);
     virtual ::grpc::Status GetSlave(::grpc::ServerContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response);
+    virtual ::grpc::Status GetSlave2(::grpc::ServerContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_HandleHeartBeats : public BaseClass {
@@ -249,7 +273,27 @@ class SNSCoordinator final {
       ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_HandleHeartBeats<WithAsyncMethod_GetFollowSyncsForUsers<WithAsyncMethod_GetServer<WithAsyncMethod_GetSlave<Service > > > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_GetSlave2 : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_GetSlave2() {
+      ::grpc::Service::MarkMethodAsync(4);
+    }
+    ~WithAsyncMethod_GetSlave2() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetSlave2(::grpc::ServerContext* /*context*/, const ::snsCoordinator::ClusterId* /*request*/, ::snsCoordinator::Server* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetSlave2(::grpc::ServerContext* context, ::snsCoordinator::ClusterId* request, ::grpc::ServerAsyncResponseWriter< ::snsCoordinator::Server>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_HandleHeartBeats<WithAsyncMethod_GetFollowSyncsForUsers<WithAsyncMethod_GetServer<WithAsyncMethod_GetSlave<WithAsyncMethod_GetSlave2<Service > > > > > AsyncService;
   template <class BaseClass>
   class WithCallbackMethod_HandleHeartBeats : public BaseClass {
    private:
@@ -354,7 +398,34 @@ class SNSCoordinator final {
     virtual ::grpc::ServerUnaryReactor* GetSlave(
       ::grpc::CallbackServerContext* /*context*/, const ::snsCoordinator::ClusterId* /*request*/, ::snsCoordinator::Server* /*response*/)  { return nullptr; }
   };
-  typedef WithCallbackMethod_HandleHeartBeats<WithCallbackMethod_GetFollowSyncsForUsers<WithCallbackMethod_GetServer<WithCallbackMethod_GetSlave<Service > > > > CallbackService;
+  template <class BaseClass>
+  class WithCallbackMethod_GetSlave2 : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_GetSlave2() {
+      ::grpc::Service::MarkMethodCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::snsCoordinator::ClusterId, ::snsCoordinator::Server>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::snsCoordinator::ClusterId* request, ::snsCoordinator::Server* response) { return this->GetSlave2(context, request, response); }));}
+    void SetMessageAllocatorFor_GetSlave2(
+        ::grpc::MessageAllocator< ::snsCoordinator::ClusterId, ::snsCoordinator::Server>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::snsCoordinator::ClusterId, ::snsCoordinator::Server>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_GetSlave2() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetSlave2(::grpc::ServerContext* /*context*/, const ::snsCoordinator::ClusterId* /*request*/, ::snsCoordinator::Server* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* GetSlave2(
+      ::grpc::CallbackServerContext* /*context*/, const ::snsCoordinator::ClusterId* /*request*/, ::snsCoordinator::Server* /*response*/)  { return nullptr; }
+  };
+  typedef WithCallbackMethod_HandleHeartBeats<WithCallbackMethod_GetFollowSyncsForUsers<WithCallbackMethod_GetServer<WithCallbackMethod_GetSlave<WithCallbackMethod_GetSlave2<Service > > > > > CallbackService;
   typedef CallbackService ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_HandleHeartBeats : public BaseClass {
@@ -420,6 +491,23 @@ class SNSCoordinator final {
     }
     // disable synchronous version of this method
     ::grpc::Status GetSlave(::grpc::ServerContext* /*context*/, const ::snsCoordinator::ClusterId* /*request*/, ::snsCoordinator::Server* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_GetSlave2 : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_GetSlave2() {
+      ::grpc::Service::MarkMethodGeneric(4);
+    }
+    ~WithGenericMethod_GetSlave2() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetSlave2(::grpc::ServerContext* /*context*/, const ::snsCoordinator::ClusterId* /*request*/, ::snsCoordinator::Server* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -502,6 +590,26 @@ class SNSCoordinator final {
     }
     void RequestGetSlave(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_GetSlave2 : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_GetSlave2() {
+      ::grpc::Service::MarkMethodRaw(4);
+    }
+    ~WithRawMethod_GetSlave2() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetSlave2(::grpc::ServerContext* /*context*/, const ::snsCoordinator::ClusterId* /*request*/, ::snsCoordinator::Server* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetSlave2(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -594,6 +702,28 @@ class SNSCoordinator final {
       ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
+  class WithRawCallbackMethod_GetSlave2 : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_GetSlave2() {
+      ::grpc::Service::MarkMethodRawCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetSlave2(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_GetSlave2() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetSlave2(::grpc::ServerContext* /*context*/, const ::snsCoordinator::ClusterId* /*request*/, ::snsCoordinator::Server* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* GetSlave2(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_GetFollowSyncsForUsers : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -674,9 +804,36 @@ class SNSCoordinator final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedGetSlave(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::snsCoordinator::ClusterId,::snsCoordinator::Server>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_GetFollowSyncsForUsers<WithStreamedUnaryMethod_GetServer<WithStreamedUnaryMethod_GetSlave<Service > > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_GetSlave2 : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_GetSlave2() {
+      ::grpc::Service::MarkMethodStreamed(4,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::snsCoordinator::ClusterId, ::snsCoordinator::Server>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::snsCoordinator::ClusterId, ::snsCoordinator::Server>* streamer) {
+                       return this->StreamedGetSlave2(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_GetSlave2() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status GetSlave2(::grpc::ServerContext* /*context*/, const ::snsCoordinator::ClusterId* /*request*/, ::snsCoordinator::Server* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedGetSlave2(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::snsCoordinator::ClusterId,::snsCoordinator::Server>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_GetFollowSyncsForUsers<WithStreamedUnaryMethod_GetServer<WithStreamedUnaryMethod_GetSlave<WithStreamedUnaryMethod_GetSlave2<Service > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_GetFollowSyncsForUsers<WithStreamedUnaryMethod_GetServer<WithStreamedUnaryMethod_GetSlave<Service > > > StreamedService;
+  typedef WithStreamedUnaryMethod_GetFollowSyncsForUsers<WithStreamedUnaryMethod_GetServer<WithStreamedUnaryMethod_GetSlave<WithStreamedUnaryMethod_GetSlave2<Service > > > > StreamedService;
 };
 
 }  // namespace snsCoordinator

@@ -8,7 +8,8 @@ service SNSCoordinator {
 	rpc HandleHeartBeats (stream Heartbeat) returns (stream Heartbeat) {}
 	rpc GetFollowSyncsForUsers (Users) returns (FollowSyncs) {}
 	rpc GetServer (User) returns (Server) {}
-	rpc GetSlave (ClusterId) returns (Server) {} // For master to communicate with slave
+	rpc GetSlave (ClusterId) returns (Server) {}
+	rpc GetSlave2(ClusterId) returns (Server){} // For master to communicate with slave
 }
 
 
