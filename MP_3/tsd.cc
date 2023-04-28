@@ -46,7 +46,7 @@ bool isSlave = false;
 std::unique_ptr<SNSService::Stub> slaveStub_;
 int server_id;
 string directory;
-
+std::shared_ptr<ClientReaderWriter<Message, Message>> slaveStream;
 void createFile() {
   ofstream o(directory);
   o << "0 0" << endl;
@@ -266,6 +266,10 @@ class SNSServiceImpl final : public SNSService::Service {
       p.post_time = m.timestamp().seconds();
       allPosts.push_back(p);
       updateData();
+
+      if(!isSlave) {
+        slaveStream->Write(m);
+      }
     }
     
     return Status::OK;
@@ -308,17 +312,21 @@ void askForSlave(std::unique_ptr<SNSCoordinator::Stub> stub_, ClusterId& cId) {
     ClientContext c2;
     // auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(5);
    // c2.set_deadline(deadline);
-    cout << "Get Slave called" << endl;
+ //   cout << "Get Slave called" << endl;
     Status status = stub_->GetSlave(&c2,cId,&slave);
     if(!status.ok()) cout << "Get slave failed" << endl;
-    cout << "Get Slave recieved" << endl;
-    // string info = slave->server_ip() + ":" + slave->port_num();
+    //cout << "Get Slave recieved" << endl;
+     string info = slave.server_ip() + ":" + slave.port_num();
     // cout << info << endl;
-    // slaveStub_ = SNSService::NewStub(grpc::CreateChannel(info, grpc::InsecureChannelCredentials()));
+     slaveStub_ = SNSService::NewStub(grpc::CreateChannel(info, grpc::InsecureChannelCredentials()));
+     ClientContext c;
+     slaveStream =  std::shared_ptr<ClientReaderWriter<Message, Message>>(
+        slaveStub_->Timeline(&c));
 }
 
 void connectToCoordinator(string &cip, string &cp, int id, string &port) {
   std::unique_ptr<SNSCoordinator::Stub> stub_ = SNSCoordinator::NewStub(grpc::CreateChannel(cip + ":" + cp, grpc::InsecureChannelCredentials()));
+  
   ClientContext context;
   ClusterId cId;
   cId.set_cluster(id);

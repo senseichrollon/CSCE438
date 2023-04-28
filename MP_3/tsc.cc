@@ -243,6 +243,8 @@ IReply Client::processCommand(std::string &input)
     }
     else
     {
+            cout << "Attempting to reconnect in 20 seconds" << endl;
+    std::this_thread::sleep_for(std::chrono::seconds(20));
         run_client();
         ire.comm_status = FAILURE_UNKNOWN;
     }
