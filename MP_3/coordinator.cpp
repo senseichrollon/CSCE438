@@ -85,7 +85,7 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
         std::thread reader_thread([&]() {
             while (stream->Read(&h))
             {
-              cout  << "heartbeat" << endl;
+      //        cout  << "heartbeat" << endl;
 
                 std::unique_lock<std::mutex> lock(mutex);
                 received_request = true;
@@ -143,11 +143,12 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
     Status GetServer(ServerContext *context, const User *user, Server *server) override {
        
    //     cout << "checkpoint" << endl;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         int id = (user->user_id() % 3);
      //   if(id == 0) id = 3;
    //     LOG(INFO) << "Getting Server for user " << id << endl;
         if(clusters[id]->masterActive) {
-          cout << "yo3" << endl;
+      //    cout << "yo3" << endl;
           server->CopyFrom(*(clusters[id]->master));
         } else {
           server->CopyFrom(*(clusters[id]->slave));
@@ -163,14 +164,14 @@ class SNSCoordinatorImpl final : public SNSCoordinator::Service {
 
     Status GetSlave(ServerContext *context, const ClusterId *cluster_id, Server *server) override {
      //   log(INFO, "GetSlave called for master " << cluster_id->cluster());
-          cout << "get slave called" << endl;
-//         int id = cluster_id->cluster();
+//          cout << "get slave called" << endl;
+        int id = cluster_id->cluster();
 //         cout << "Retrieving slave for master " << id << endl;
 
-//         while(!clusters[id]->slaveActive) {
-//           std::this_thread::sleep_for(std::chrono::seconds(1));
-//         }
-//         server->CopyFrom(*(clusters[id]->slave));
+         while(!clusters[id]->slaveActive) {
+           std::this_thread::sleep_for(std::chrono::seconds(1));
+         }
+         server->CopyFrom(*(clusters[id]->slave));
 //  //       cout << "Port number for slave: " <<  server->port_num() << endl;
 //         cout << "Status of master: " << clusters[id]->masterActive << endl;
          return Status::OK;

@@ -41,7 +41,7 @@ using csce438::Request;
 using csce438::Reply;
 using csce438::SNSService;
 
-Server* slave;
+Server slave;
 bool isSlave = false;
 std::unique_ptr<SNSService::Stub> slaveStub_;
 int server_id;
@@ -309,7 +309,7 @@ void askForSlave(std::unique_ptr<SNSCoordinator::Stub> stub_, ClusterId& cId) {
     // auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(5);
    // c2.set_deadline(deadline);
     cout << "Get Slave called" << endl;
-    Status status = stub_->GetSlave2(&c2,cId,slave);
+    Status status = stub_->GetSlave(&c2,cId,&slave);
     if(!status.ok()) cout << "Get slave failed" << endl;
     cout << "Get Slave recieved" << endl;
     // string info = slave->server_ip() + ":" + slave->port_num();

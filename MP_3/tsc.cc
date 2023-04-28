@@ -296,12 +296,14 @@ void Client::processTimeline()
     thread tt(process_input, stream, std::ref(username));
     tt.detach();
     Message msg;
-     auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(5);
-    context.set_deadline(deadline);
+   //  auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(5);
+   // context.set_deadline(deadline);
     while (stream->Read(&msg))
     {
         time_t t = static_cast<std::time_t>(msg.timestamp().seconds());
         displayPostMessage(msg.username(), msg.msg(), t);
     }
+    cout << "Attempting to reconnect in 20 seconds" << endl;
+    std::this_thread::sleep_for(std::chrono::seconds(20));
     run_client();
 }
