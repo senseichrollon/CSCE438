@@ -23,7 +23,10 @@ using snsCoordinator::SNSCoordinator;
 using snsCoordinator::User;
 using snsCoordinator::Users;
 #include "sns.grpc.pb.h"
-
+#include <glog/logging.h>
+#define log(severity, msg) \
+    LOG(severity) << msg;  \
+    google::FlushLogFiles(google::severity);
 using namespace std;
 using google::protobuf::Timestamp;
 using google::protobuf::Duration;
@@ -50,7 +53,7 @@ std::shared_ptr<ClientReaderWriter<Message, Message>> slaveStream;
 void createFile() {
   ofstream o(directory);
   o << "0 0" << endl;
-  cout << "hi" << endl;
+ // cout << "hi" << endl;
   o.close();
 }
 
@@ -58,7 +61,7 @@ class SNSServiceImpl final : public SNSService::Service {
   public:
   void loadData() {
 
-    cout << "bay" << endl;
+   // cout << "bay" << endl;
     ifstream in;
     in.open(directory);
     if(!in) {
@@ -306,6 +309,7 @@ void RunServer(string ip, std::string port_no) {
 
   std::unique_ptr<grpc::Server> srv(builder.BuildAndStart());
   srv->Wait();
+  log(INFO, "Server ready for requests");
 }
 
 void askForSlave(std::unique_ptr<SNSCoordinator::Stub> stub_, ClusterId& cId) {
@@ -322,9 +326,11 @@ void askForSlave(std::unique_ptr<SNSCoordinator::Stub> stub_, ClusterId& cId) {
      ClientContext c;
      slaveStream =  std::shared_ptr<ClientReaderWriter<Message, Message>>(
         slaveStub_->Timeline(&c));
+      isSlave = false;
+      log(INFO, "Slave server recieved");
 }
 
-void connectToCoordinator(string &cip, string &cp, int id, string &port) {
+void connectToCoordinator(string &cip, string &cp, int id, string &port, string &type) {
   std::unique_ptr<SNSCoordinator::Stub> stub_ = SNSCoordinator::NewStub(grpc::CreateChannel(cip + ":" + cp, grpc::InsecureChannelCredentials()));
   
   ClientContext context;
@@ -332,7 +338,7 @@ void connectToCoordinator(string &cip, string &cp, int id, string &port) {
   cId.set_cluster(id);
   Heartbeat h;
   h.set_server_id(id);
-  h.set_server_type(isSlave? ServerType::SLAVE : ServerType::MASTER);
+  h.set_server_type(type == "slave"? ServerType::SLAVE : ServerType::MASTER);
   h.set_server_ip(cip);
   h.set_server_port(port);
 
@@ -340,19 +346,21 @@ std::shared_ptr<ClientReaderWriter<Heartbeat, Heartbeat>> stream(stub_->HandleHe
 
  
 
-  if(!isSlave) {
+  if(type == "slave") {
     thread t(askForSlave, std::move(stub_), std::ref(cId));
     t.detach();
   }
 
   stream->Write(h);
-  cout << "checkpoint 3" << endl;
+  log(INFO, "Connected to coordinator");
+ // cout << "checkpoint 3" << endl;
   while(true) {
      unsigned time = std::time(0);
      google::protobuf::Timestamp *stamp = new google::protobuf::Timestamp();
      stamp->set_seconds(time);
      h.set_allocated_timestamp(stamp);
      stream->Write(h);
+     log(INFO, "Hearbeat sent to coordinator");
      std::this_thread::sleep_for(std::chrono::seconds(10));
   }
 }
@@ -375,7 +383,7 @@ int main(int argc, char** argv) {
   int idx = 0;
   
 
-  while ((opt = getopt_long_only(argc, argv, "c:i:p:d:t:", optlong, &idx)) != -1){
+  while ((opt = getopt_long(argc, argv, "c:i:p:d:t:", optlong, &idx)) != -1){
     switch(opt) {
       case 'p':
           port = optarg;
@@ -388,6 +396,7 @@ int main(int argc, char** argv) {
         break;
       case 'd':
         id = atoi(optarg);
+     //   cout << "bro" << id <<endl;
         break;
       case 't':
         type = optarg;
@@ -397,13 +406,14 @@ int main(int argc, char** argv) {
     }
   }
 
-  if(type == "slave") {
-    isSlave = true;
-  }
-  server_id = id;
 
+  server_id = id;
+  isSlave = true;
   directory = type + to_string(id) + ".txt";
-  thread t(connectToCoordinator, std::ref(coordinatorIP), std::ref(coordinatorPort), id, std::ref(port));
+
+  string name = type + "- " + to_string(id) + ".txt";
+  google::InitGoogleLogging(name.c_str());
+  thread t(connectToCoordinator, std::ref(coordinatorIP), std::ref(coordinatorPort), id, std::ref(port), std::ref(type));
   t.detach();
   RunServer("localhost",port);
   return 0;

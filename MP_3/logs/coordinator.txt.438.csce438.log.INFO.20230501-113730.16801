@@ -1,0 +1,92 @@
+Log file created at: 2023/05/01 11:37:30
+Running on machine: 438
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20230501 11:37:30.544131 16820 coordinator.cpp:98] heartbeat recieved from master 1
+I20230501 11:37:30.852074 16835 coordinator.cpp:98] heartbeat recieved from master 2
+I20230501 11:37:31.152441 16850 coordinator.cpp:98] heartbeat recieved from master 0
+I20230501 11:37:31.466331 16866 coordinator.cpp:98] heartbeat recieved from slave 1
+I20230501 11:37:31.469563 16864 coordinator.cpp:191] GetSlave called for master 1
+I20230501 11:37:31.469585 16864 coordinator.cpp:205] GetSlave pending for cluster  1
+I20230501 11:37:31.889453 16885 coordinator.cpp:98] heartbeat recieved from slave 2
+I20230501 11:37:31.889760 16867 coordinator.cpp:191] GetSlave called for master 2
+I20230501 11:37:31.889783 16867 coordinator.cpp:205] GetSlave pending for cluster  2
+I20230501 11:37:32.545212 16904 coordinator.cpp:98] heartbeat recieved from slave 0
+I20230501 11:37:32.545507 16886 coordinator.cpp:191] GetSlave called for master 0
+I20230501 11:37:32.545531 16886 coordinator.cpp:205] GetSlave pending for cluster  0
+I20230501 11:37:33.329634 16886 coordinator.cpp:165] GetServer called for user 1
+I20230501 11:37:33.329680 16886 coordinator.cpp:171] Master Server1 returned for user 1
+I20230501 11:37:34.083240 16886 coordinator.cpp:165] GetServer called for user 2
+I20230501 11:37:34.083312 16886 coordinator.cpp:171] Master Server2 returned for user 2
+I20230501 11:37:35.007371 16886 coordinator.cpp:165] GetServer called for user 3
+I20230501 11:37:35.007421 16886 coordinator.cpp:171] Master Server0 returned for user 3
+I20230501 11:37:35.800999 16905 coordinator.cpp:165] GetServer called for user 4
+I20230501 11:37:35.801048 16905 coordinator.cpp:171] Master Server1 returned for user 4
+I20230501 11:37:36.565683 16905 coordinator.cpp:165] GetServer called for user 5
+I20230501 11:37:36.565737 16905 coordinator.cpp:171] Master Server2 returned for user 5
+I20230501 11:37:37.479406 16886 coordinator.cpp:165] GetServer called for user 0
+I20230501 11:37:37.479456 16886 coordinator.cpp:171] Master Server0 returned for user 0
+I20230501 11:37:38.238162 16886 coordinator.cpp:165] GetServer called for user 7
+I20230501 11:37:38.238200 16886 coordinator.cpp:171] Master Server1 returned for user 7
+I20230501 11:37:38.979002 16886 coordinator.cpp:165] GetServer called for user 8
+I20230501 11:37:38.979046 16886 coordinator.cpp:171] Master Server2 returned for user 8
+I20230501 11:37:39.877864 16886 coordinator.cpp:165] GetServer called for user 9
+I20230501 11:37:39.877908 16886 coordinator.cpp:171] Master Server0 returned for user 9
+I20230501 11:37:40.554790 16820 coordinator.cpp:98] heartbeat recieved from master 1
+I20230501 11:37:40.659317 16905 coordinator.cpp:165] GetServer called for user 10
+I20230501 11:37:40.659363 16905 coordinator.cpp:171] Master Server1 returned for user 10
+I20230501 11:37:40.862231 16835 coordinator.cpp:98] heartbeat recieved from master 2
+I20230501 11:37:41.160424 16850 coordinator.cpp:98] heartbeat recieved from master 0
+I20230501 11:37:41.485380 16866 coordinator.cpp:98] heartbeat recieved from slave 1
+I20230501 11:37:41.708313 16905 coordinator.cpp:165] GetServer called for user 11
+I20230501 11:37:41.708361 16905 coordinator.cpp:171] Master Server2 returned for user 11
+I20230501 11:37:41.890466 16885 coordinator.cpp:98] heartbeat recieved from slave 2
+I20230501 11:37:42.547305 16905 coordinator.cpp:165] GetServer called for user 12
+I20230501 11:37:42.547353 16905 coordinator.cpp:171] Master Server0 returned for user 12
+I20230501 11:37:42.590643 16904 coordinator.cpp:98] heartbeat recieved from slave 0
+I20230501 11:37:43.360692 16886 coordinator.cpp:165] GetServer called for user 13
+I20230501 11:37:43.360777 16886 coordinator.cpp:171] Master Server1 returned for user 13
+I20230501 11:37:44.214366 16886 coordinator.cpp:165] GetServer called for user 14
+I20230501 11:37:44.214426 16886 coordinator.cpp:171] Master Server2 returned for user 14
+I20230501 11:37:45.167812 16886 coordinator.cpp:165] GetServer called for user 15
+I20230501 11:37:45.167862 16886 coordinator.cpp:171] Master Server0 returned for user 15
+I20230501 11:37:45.992703 16905 coordinator.cpp:165] GetServer called for user 16
+I20230501 11:37:45.992748 16905 coordinator.cpp:171] Master Server1 returned for user 16
+I20230501 11:37:46.785877 16905 coordinator.cpp:165] GetServer called for user 17
+I20230501 11:37:46.785916 16905 coordinator.cpp:171] Master Server2 returned for user 17
+I20230501 11:37:47.595103 16905 coordinator.cpp:165] GetServer called for user 18
+I20230501 11:37:47.595163 16905 coordinator.cpp:171] Master Server0 returned for user 18
+I20230501 11:37:48.423444 16905 coordinator.cpp:165] GetServer called for user 19
+I20230501 11:37:48.423485 16905 coordinator.cpp:171] Master Server1 returned for user 19
+I20230501 11:37:49.311736 16886 coordinator.cpp:165] GetServer called for user 20
+I20230501 11:37:49.311847 16886 coordinator.cpp:171] Master Server2 returned for user 20
+I20230501 11:37:50.559796 16820 coordinator.cpp:98] heartbeat recieved from master 1
+I20230501 11:37:50.872848 16835 coordinator.cpp:98] heartbeat recieved from master 2
+I20230501 11:37:51.163030 16850 coordinator.cpp:98] heartbeat recieved from master 0
+I20230501 11:37:51.494624 16866 coordinator.cpp:98] heartbeat recieved from slave 1
+I20230501 11:37:51.924427 16885 coordinator.cpp:98] heartbeat recieved from slave 2
+I20230501 11:37:52.601182 16904 coordinator.cpp:98] heartbeat recieved from slave 0
+I20230501 11:38:00.569484 16820 coordinator.cpp:98] heartbeat recieved from master 1
+I20230501 11:38:00.879130 16835 coordinator.cpp:98] heartbeat recieved from master 2
+I20230501 11:38:01.166728 16850 coordinator.cpp:98] heartbeat recieved from master 0
+I20230501 11:38:01.505579 16866 coordinator.cpp:98] heartbeat recieved from slave 1
+I20230501 11:38:01.949656 16885 coordinator.cpp:98] heartbeat recieved from slave 2
+I20230501 11:38:02.627470 16904 coordinator.cpp:98] heartbeat recieved from slave 0
+I20230501 11:38:10.578737 16820 coordinator.cpp:98] heartbeat recieved from master 1
+I20230501 11:38:10.901417 16835 coordinator.cpp:98] heartbeat recieved from master 2
+I20230501 11:38:11.173192 16850 coordinator.cpp:98] heartbeat recieved from master 0
+I20230501 11:38:11.528190 16866 coordinator.cpp:98] heartbeat recieved from slave 1
+I20230501 11:38:11.971935 16885 coordinator.cpp:98] heartbeat recieved from slave 2
+I20230501 11:38:12.633394 16904 coordinator.cpp:98] heartbeat recieved from slave 0
+I20230501 11:38:20.580030 16820 coordinator.cpp:98] heartbeat recieved from master 1
+I20230501 11:38:20.949940 16835 coordinator.cpp:98] heartbeat recieved from master 2
+I20230501 11:38:21.179510 16850 coordinator.cpp:98] heartbeat recieved from master 0
+I20230501 11:38:21.539613 16866 coordinator.cpp:98] heartbeat recieved from slave 1
+I20230501 11:38:21.981249 16885 coordinator.cpp:98] heartbeat recieved from slave 2
+I20230501 11:38:22.649286 16904 coordinator.cpp:98] heartbeat recieved from slave 0
+I20230501 11:38:30.583467 16820 coordinator.cpp:98] heartbeat recieved from master 1
+I20230501 11:38:30.975432 16835 coordinator.cpp:98] heartbeat recieved from master 2
+I20230501 11:38:31.190685 16850 coordinator.cpp:98] heartbeat recieved from master 0
+I20230501 11:38:31.544762 16866 coordinator.cpp:98] heartbeat recieved from slave 1
+I20230501 11:38:31.995838 16885 coordinator.cpp:98] heartbeat recieved from slave 2
+I20230501 11:38:32.653342 16904 coordinator.cpp:98] heartbeat recieved from slave 0

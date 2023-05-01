@@ -1,0 +1,13 @@
+Log file created at: 2023/05/01 11:37:31
+Running on machine: 438
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20230501 11:37:31.889233 16879 tsd.cc:355] Connected to coordinator
+I20230501 11:37:31.889495 16879 tsd.cc:363] Hearbeat sent to coordinator
+I20230501 11:37:31.890928 16884 tsd.cc:330] Slave server recieved
+I20230501 11:37:41.892546 16879 tsd.cc:363] Hearbeat sent to coordinator
+I20230501 11:37:51.924691 16879 tsd.cc:363] Hearbeat sent to coordinator
+I20230501 11:38:01.949818 16879 tsd.cc:363] Hearbeat sent to coordinator
+I20230501 11:38:11.972203 16879 tsd.cc:363] Hearbeat sent to coordinator
+I20230501 11:38:21.981406 16879 tsd.cc:363] Hearbeat sent to coordinator
+I20230501 11:38:31.995990 16879 tsd.cc:363] Hearbeat sent to coordinator

@@ -73,7 +73,7 @@ int main(int argc, char **argv)
     for(int i = 0; i < argc; i++) {
      //   cout << argv[i] << endl;
     }
-    while ((opt = getopt_long_only(argc, argv, "c:i:p:d:", optlong, &idxx)) != -1)
+    while ((opt = getopt_long(argc, argv, "c:i:p:d:", optlong, &idxx)) != -1)
     {
    //     cout << opt << endl;
         switch (opt)
@@ -94,6 +94,8 @@ int main(int argc, char **argv)
             std::cerr << "Invalid Command Line Argument\n";
         }
     }
+    string name = "client-" + to_string(id) + ".txt";
+    google::InitGoogleLogging(name.c_str());
     Client myc(coordinatorIP, to_string(id), coordinatorPort);
     // You MUST invoke "run_client" function to start business logic
     myc.run_client();
@@ -117,16 +119,17 @@ int Client::connectTo()
     
     
     stub2_ = SNSCoordinator::NewStub(grpc::CreateChannel(cip + ":" + cp, grpc::InsecureChannelCredentials()));
-    cout << (cip + ":" + cp) << endl;
+    //cout << (cip + ":" + cp) << endl;
     ClientContext context;
     User user;
     user.set_user_id(stoi(username));
     Server server;
     Status status = stub2_->GetServer(&context,user,&server);
 
-    if(!status.ok()) return -1;    
+    if(!status.ok()) return -1;   
+    log(INFO, "Succesfully connected to coordiantor"); 
      string info = server.server_ip() + ":" + server.port_num();
-     cout << info << endl;
+//    /  cout << info << endl;
      stub_ = SNSService::NewStub(grpc::CreateChannel(info, grpc::InsecureChannelCredentials()));
      ClientContext context2;
      Request request;
@@ -135,6 +138,7 @@ int Client::connectTo()
      status = stub_->Login(&context2, request, &reply);
      if (status.ok() && reply.msg() == "SUCCESS")
      {
+        log(INFO, "Succesfully connected to cluster " << server.server_id());
              return 1;
      }
     return -1; // return 1 if success, otherwise return -1

@@ -1,0 +1,12 @@
+Log file created at: 2023/05/01 11:37:30
+Running on machine: 438
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20230501 11:37:30.543885 16814 tsd.cc:355] Connected to coordinator
+I20230501 11:37:30.545536 16814 tsd.cc:363] Hearbeat sent to coordinator
+I20230501 11:37:40.554253 16814 tsd.cc:363] Hearbeat sent to coordinator
+I20230501 11:37:50.559581 16814 tsd.cc:363] Hearbeat sent to coordinator
+I20230501 11:38:00.569058 16814 tsd.cc:363] Hearbeat sent to coordinator
+I20230501 11:38:10.578284 16814 tsd.cc:363] Hearbeat sent to coordinator
+I20230501 11:38:20.579479 16814 tsd.cc:363] Hearbeat sent to coordinator
+I20230501 11:38:30.583231 16814 tsd.cc:363] Hearbeat sent to coordinator

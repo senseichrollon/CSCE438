@@ -1,0 +1,6 @@
+Log file created at: 2023/05/01 11:37:47
+Running on machine: 438
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20230501 11:37:47.595448 17156 tsc.cc:130] Succesfully connected to coordiantor
+I20230501 11:37:47.614220 17156 tsc.cc:141] Succesfully connected to cluster 0

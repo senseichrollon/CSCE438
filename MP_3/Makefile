@@ -2,15 +2,15 @@ HOST_SYSTEM = $(shell uname | cut -f 1 -d_)
 SYSTEM ?= $(HOST_SYSTEM)
 CXX = g++
 CPPFLAGS += -I$(MY_INSTALL_DIR)/include -I/home/csce438/grpc/third_party/protobuf/src -I/home/csce438/grpc/include -I/home/csce438/grpc/third_party/abseil-cpp -pthread
-CXXFLAGS += -std=c++11
+CXXFLAGS += -std=c++17
 ifeq ($(SYSTEM),Darwin)
 LDFLAGS += -L$(MY_INSTALL_DIR)/lib `pkg-config --libs protobuf grpc++ grpc`\
            -lgrpc++_reflection\
-           -ldl
+           -ldl -lglog
 else
 LDFLAGS += -L$(MY_INSTALL_DIR)/lib `pkg-config --libs protobuf grpc++ grpc`\
            -Wl,--no-as-needed -lgrpc++_reflection -Wl,--as-needed\
-           -ldl
+           -ldl -lglog
 endif
 PROTOC = protoc
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
@@ -18,15 +18,16 @@ GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 
 all: system-check tsc tsd coordinator synchronizer
 
-tsc: sns.pb.o sns.grpc.pb.o snsCoordinator.pb.o snsCoordinator.grpc.pb.o snsFollowSync.pb.o snsFollowSync.grpc.pb.o tsc.o
+tsc: snsCoordinator.pb.o snsCoordinator.grpc.pb.o sns.pb.o sns.grpc.pb.o snsFollowSync.pb.o snsFollowSync.grpc.pb.o tsc.o
 	$(CXX) $^ $(LDFLAGS) -g -o $@
 
-tsd: sns.pb.o sns.grpc.pb.o snsCoordinator.pb.o snsCoordinator.grpc.pb.o snsFollowSync.pb.o snsFollowSync.grpc.pb.o tsd.o
+tsd: snsCoordinator.pb.o snsCoordinator.grpc.pb.o sns.pb.o sns.grpc.pb.o snsFollowSync.pb.o snsFollowSync.grpc.pb.o tsd.o
 	$(CXX) $^ $(LDFLAGS) -g -o $@
 
-coordinator: sns.pb.o sns.grpc.pb.o snsCoordinator.pb.o snsCoordinator.grpc.pb.o snsFollowSync.pb.o snsFollowSync.grpc.pb.o coordinator.o
+coordinator: snsCoordinator.pb.o snsCoordinator.grpc.pb.o sns.pb.o sns.grpc.pb.o snsFollowSync.pb.o snsFollowSync.grpc.pb.o coordinator.o
 	$(CXX) $^ $(LDFLAGS) -g -o $@
-synchronizer: sns.pb.o sns.grpc.pb.o snsCoordinator.pb.o snsCoordinator.grpc.pb.o snsFollowSync.pb.o snsFollowSync.grpc.pb.o synchronizer.o
+
+synchronizer: snsCoordinator.pb.o snsCoordinator.grpc.pb.o sns.pb.o sns.grpc.pb.o snsFollowSync.pb.o snsFollowSync.grpc.pb.o synchronizer.o
 	$(CXX) $^ $(LDFLAGS) -g -o $@
 
 .PRECIOUS: %.grpc.pb.cc
@@ -37,8 +38,11 @@ synchronizer: sns.pb.o sns.grpc.pb.o snsCoordinator.pb.o snsCoordinator.grpc.pb.
 %.pb.cc: %.proto
 	$(PROTOC) -I.:/home/csce438/grpc/third_party/protobuf/src --cpp_out=. $<
 
-clean:
-	rm -f *.txt *.o *.pb.cc *.pb.h tsc tsd
+clean: dclean
+	rm -rf *.txt *.o *.pb.cc *.pb.h tsc tsd coordinator synchronizer
+
+dclean: 
+	rm -rf ./logs/* ./*_1/ ./*_2/ ./*_3/
 
 
 # The following is to test your system and ensure a smoother experience.
